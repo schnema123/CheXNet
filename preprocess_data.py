@@ -6,7 +6,7 @@ import scipy as sp
 NIHCC_PATH = "../nihcc"
 NIHCC_IMAGE_PATH = "../nihcc/images_scaled"
 
-FINDINGS = ["Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass", "Nodule", "Pneumonia",
+FINDINGS = ["No Finding", "Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass", "Nodule", "Pneumonia",
             "Pneumothorax", "Consolidation", "Edema", "Emphysema", "Fibrosis", "Pleural_Thickening", "Hernia"]
 NUM_FINDINGS = len(FINDINGS)
 
@@ -34,10 +34,9 @@ def parse_rows(rows):
         # Get findings
         findings = row["Finding Labels"]
 
-        findings_vector = []
+        findings_vector = [0 for _ in range(NUM_FINDINGS)]
         for finding in findings.split("|"):
-            if (finding != "No Finding"):
-                findings_vector.append(FINDINGS.index(finding))
+            findings_vector[FINDINGS.index(finding)] = 1
 
         example = tf.train.Example(features=tf.train.Features(feature=
         {
