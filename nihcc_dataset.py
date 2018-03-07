@@ -15,21 +15,28 @@ FIELDS_DEFAULT = [[""] * 11]
 FINDINGS = ["No Finding", "Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass", "Nodule", "Pneumonia",
             "Pneumothorax", "Consolidation", "Edema", "Emphysema", "Fibrosis", "Pleural_Thickening", "Hernia"]
 
-def _parse_line(line):
+def _parse_tfrecord(tfrecord):
 
-    csv_line = tf.decode_csv(line, FIELDS_DEFAULT)
+    features = {
+        'image': tf.FixedLenFeature([], tf.String),
+        'findings': tf.FixedLenFeature([15], tf.int64)
+    }
+    record = tf.parse_single_example(tfrecord)
 
-    # Read image
-    image_name = csv_line[IMAGE_FIELD]
+    images_path = tf.constant("../nihcc/images_scaled/")
+    image_full_path = tf.string_join([images_path, record[image]])
 
-    findings = csv_line[FINDINGS_FIELD]
-    findings_array = findings
+    image_string = tf.read_file(image_full_path)
+    image_decoded = tf.image.decode_image(image_string)
 
+    return image_decoded, record["findings"]
 
 
 def create_dataset():
 
+    tf_record_path = "../nihcc/tfrecords/train.tfrecord"
+
     # Pass this in as a flag
-    ds = tf.data.TextLineDataSet(DATA_PATH + TRAIN_DATA).skip(1)
-    ds = ds.map(_parse_line)
+    ds = tf.data.TFRecordDataset(tf_record_path)
+    ds = ds.map(_parse_tfrecord)
 

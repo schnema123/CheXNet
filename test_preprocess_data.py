@@ -15,7 +15,7 @@ for record in tfrecord_train_iterator:
     img_file_name_raw = example.features.feature["image"].bytes_list.value[0]
     img_file_name = tf.compat.as_text(img_file_name_raw)
 
-    labels = example.features.feature["image"].int64_list.value[0]
+    labels = example.features.feature["findings"].int64_list.value
 
     print(img_file_name)
     print(labels)
