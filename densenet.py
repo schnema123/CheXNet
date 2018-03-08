@@ -38,7 +38,7 @@ def _conv(inputs, num_filters, kernel_size, stride=1, dropout_rate=None,
     net = slim.conv2d(net, num_filters, kernel_size)
 
     if dropout_rate:
-      net = tf.nn.dropout(net, dropout_rate)
+      net = slim.dropout(net, dropout_rate)
 
     net = slim.utils.collect_named_outputs(outputs_collections, sc.name, net)
 
@@ -49,6 +49,7 @@ def _conv(inputs, num_filters, kernel_size, stride=1, dropout_rate=None,
 def _conv_block(inputs, num_filters, scope=None, outputs_collections=None):
   with tf.variable_scope(scope, 'conv_blockx', [inputs]) as sc:
     net = inputs
+    # Bottleneck layer
     net = _conv(net, num_filters*4, 1, scope='x1')
     net = _conv(net, num_filters, 3, scope='x2')
     net = tf.concat([inputs, net], axis=3)

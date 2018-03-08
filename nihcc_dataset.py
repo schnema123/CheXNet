@@ -55,13 +55,29 @@ def _read_csv():
                 
             labels.append(findings_vector)
 
-    return tf.convert_to_tensor(images), tf.convert_to_tensor(labels)
+    return images, labels
 
 
-def create_dataset():
+def create_dataset(mode):
 
     # Get csv data
     images, labels = _read_csv()
+
+    fith_of_dataset = len(images) // 5
+
+    # Split 60/20/20
+    if (mode == tf.estimator.ModeKeys.TRAIN):
+        images = images[:fith_of_dataset * 3]
+        labels = labels[:fith_of_dataset * 3]
+    elif (mode == tf.estimator.ModeKeys.EVAL):
+        images = images[fith_of_dataset * 3 : fith_of_dataset * 4]
+        labels = labels[fith_of_dataset * 3 : fith_of_dataset * 4]
+    elif (mode == tf.estimator.ModeKeys.PREDICT):
+        images = images[fith_of_dataset * 4:]
+        labels = labels[fith_of_dataset * 4:]
+
+    images = tf.convert_to_tensor(images)
+    labels = tf.convert_to_tensor(labels)
 
     print(images)
     print(labels)
@@ -70,6 +86,3 @@ def create_dataset():
     ds = ds.map(_read_image)
 
     return ds
-
-
-create_dataset()
