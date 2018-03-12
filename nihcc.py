@@ -16,6 +16,13 @@ def model_fn(
     net, _ = densenet.densenet121(
         features, num_classes=14, is_training=in_training)
 
+    checkpoint_to_load = "../imagenet_pretrained/tf-densenet121.ckpt"
+    trainable_variables = tf.trainable_variables()
+    assigment_map = {var.name.split(":")[0]: var for var in trainable_variables if not var.name.endswith("/biases:0") and "final_block" not in var.name and "fully_connected" not in var.name}
+    print(assigment_map)
+    tf.train.init_from_checkpoint(
+        checkpoint_to_load, assigment_map)
+
     logits = net
     logits = tf.reshape(logits, [-1, 14])
 
@@ -40,12 +47,13 @@ def model_fn(
 
     tf.summary.scalar("loss", loss)
     for var in tf.global_variables():
-        tf.summary.histogram(var.name, var)
+        name = var.name.replace(":", "_")
+        tf.summary.histogram(name, var)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
-        # optimizer = tf.train.AdamOptimizer(
-        #    learning_rate=0.001, beta1=0.9, beta2=0.999)
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+        optimizer = tf.train.AdamOptimizer(
+            learning_rate=0.001, beta1=0.9, beta2=0.999)
+        # optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step()
@@ -80,6 +88,7 @@ def main():
 
     estimator = tf.estimator.Estimator(
         model_fn=model_fn, model_dir="J:/BA/tmp/")
+
     estimator.train(input_fn=lambda: input_fn(
         16, tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
 

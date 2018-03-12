@@ -11,7 +11,7 @@ thread_pool_executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 def resize_img(input_path, output_path):
     img = Image.open(input_path)
     img = img.resize((224, 224), Image.ANTIALIAS)
-    img = img.convert("L")
+    img = img.convert("RGB")
     img.save(output_path)
 
 for file in os.listdir(input_dir):

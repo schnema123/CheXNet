@@ -30,7 +30,7 @@ def _read_image(filename, label):
     image_decoded = tf.image.convert_image_dtype(image_decoded, tf.float32)
     image_decoded = tf.image.per_image_standardization(image_decoded)
     image_decoded = tf.image.random_flip_left_right(image_decoded)
-    image_decoded.set_shape((224, 224, 1))
+    image_decoded.set_shape([224, 224, 3])
 
     return image_decoded, label
 
