@@ -2,6 +2,8 @@ import tensorflow as tf
 import densenet
 import nihcc_dataset
 
+slim = tf.contrib.slim
+
 
 def model_fn(
         features,
@@ -11,31 +13,37 @@ def model_fn(
     tf.summary.image("image", features)
 
     in_training = (mode == tf.estimator.ModeKeys.TRAIN)
-    net, end_points = densenet.densenet121(
+    net, _ = densenet.densenet121(
         features, num_classes=15, is_training=in_training)
 
     logits = net
     logits = tf.reshape(logits, [-1, 15])
 
-    tensor_softmax = tf.identity(end_points["predictions"], name="tensor_softmax")
+    probabilities = tf.sigmoid(logits, name="probabilities")
+
+    tf.identity(logits, "logits_tensor")
+    tf.identity(labels, "labels_tensor")
 
     predictions = {
         "classes": tf.argmax(input=logits, axis=1),
-        "probabilities": tensor_softmax
+        "probabilities": probabilities
     }
     if mode == tf.estimator.ModeKeys.PREDICT:
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+        return tf.estimator.EstimatorSpec(mode=mode, predictions=probabilities)
 
     # Calculate loss
-    loss = tf.losses.softmax_cross_entropy(
-        onehot_labels=labels, logits=logits)
+    loss = tf.losses.sigmoid_cross_entropy(
+        multi_class_labels=labels, logits=logits)
+
+    tf.identity(loss, "loss_tensor")
 
     tf.summary.scalar("loss", loss)
     for var in tf.global_variables():
         tf.summary.histogram(var.name, var)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.AdamOptimizer(learning_rate=0.001, beta1=0.9, beta2=0.999)
+        optimizer = tf.train.AdamOptimizer(
+            learning_rate=0.001, beta1=0.9, beta2=0.999)
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step()
@@ -50,6 +58,7 @@ def model_fn(
 
 def input_fn(batch_size, mode):
     """An input function for training"""
+    # TODO: Do not shuffle and repeat when doing evaluation?
     ds = nihcc_dataset.create_dataset(mode)
     ds = ds.apply(tf.contrib.data.shuffle_and_repeat(100))
     ds = ds.batch(batch_size)
@@ -60,11 +69,17 @@ def main():
 
     tf.logging.set_verbosity(tf.logging.INFO)
 
-    tensors_to_log = {"probabilities": "tensor_softmax"}
-    logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=2)
+    tensors_to_log = {"probabilities": "probabilities",
+                      "labels": "labels_tensor",
+                      "logits": "logits_tensor",
+                      "loss": "loss_tensor"}
+    logging_hook = tf.train.LoggingTensorHook(
+        tensors=tensors_to_log, every_n_iter=1)
 
-    estimator = tf.estimator.Estimator(model_fn=model_fn, model_dir="J:/BA/tmp/")
-    estimator.train(input_fn=lambda: input_fn(16, tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
+    estimator = tf.estimator.Estimator(
+        model_fn=model_fn, model_dir="J:/BA/tmp/")
+    estimator.train(input_fn=lambda: input_fn(
+        16, tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
 
 
 if __name__ == "__main__":

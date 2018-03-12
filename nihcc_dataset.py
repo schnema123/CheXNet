@@ -32,7 +32,7 @@ def _read_image(filename, label):
     image_decoded = tf.image.random_flip_left_right(image_decoded)
     image_decoded.set_shape((224, 224, 1))
 
-    return tf.convert_to_tensor(image_decoded), tf.convert_to_tensor(label)
+    return image_decoded, label
 
 
 def _read_csv(filename):
@@ -71,15 +71,12 @@ def create_dataset(mode):
     elif (mode == tf.estimator.ModeKeys.PREDICT):
         filename = "Data_Test.csv"
 
-    images, labels = _read_csv(filename)
+    images, labels = _read_csv(filename)   
 
-    print(images)
-    print(labels)
+    images = tf.convert_to_tensor(images)
+    labels= tf.convert_to_tensor(labels)
 
     ds = tf.data.Dataset.from_tensor_slices((images, labels))
     ds = ds.map(_read_image)
-
-    print(images)
-    print(labels)
 
     return ds

@@ -25,7 +25,7 @@ def parse_rows(rows, fieldnames):
 
     random.shuffle(patients)
 
-    training_writer = csv_writer("../nihcc/Data_Traing.csv", fieldnames)
+    training_writer = csv_writer("../nihcc/Data_Train.csv", fieldnames)
     eval_writer = csv_writer("../nihcc/Data_Eval.csv", fieldnames)
     test_writer = csv_writer("../nihcc/Data_Test.csv", fieldnames)
 
