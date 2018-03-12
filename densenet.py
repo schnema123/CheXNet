@@ -149,8 +149,9 @@ def densenet(inputs,
       with tf.variable_scope('final_block', [inputs]):
         net = slim.batch_norm(net)
         net = tf.nn.relu(net)
-        net = tf.reduce_mean(net, [1,2], name='global_avg_pool', keep_dims=True)
+        net = tf.reduce_mean(net, [1,2], name='global_avg_pool', keep_dims=True) # Does global average pooling
 
+      # Replaces fully connected layer
       net = slim.conv2d(net, num_classes, 1,
                         biases_initializer=tf.zeros_initializer(),
                         scope='logits')

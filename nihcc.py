@@ -14,10 +14,10 @@ def model_fn(
     net, end_points = densenet.densenet121(
         features, num_classes=15, is_training=in_training)
 
-    logits = end_points["predictions"]
+    logits = net
     logits = tf.reshape(logits, [-1, 15])
 
-    tensor_softmax = tf.nn.softmax(logits, name="tensor_softmax")
+    tensor_softmax = tf.identity(end_points["predictions"], name="tensor_softmax")
 
     predictions = {
         "classes": tf.argmax(input=logits, axis=1),
@@ -31,7 +31,8 @@ def model_fn(
         onehot_labels=labels, logits=logits)
 
     tf.summary.scalar("loss", loss)
-
+    for var in tf.global_variables():
+        tf.summary.histogram(var.name, var)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.AdamOptimizer(learning_rate=0.001, beta1=0.9, beta2=0.999)
@@ -50,7 +51,8 @@ def model_fn(
 def input_fn(batch_size, mode):
     """An input function for training"""
     ds = nihcc_dataset.create_dataset(mode)
-    ds = ds.shuffle(1000).repeat().batch(batch_size)
+    ds = ds.apply(tf.contrib.data.shuffle_and_repeat(100))
+    ds = ds.batch(batch_size)
     return ds.make_one_shot_iterator().get_next()
 
 
@@ -62,7 +64,7 @@ def main():
     logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=2)
 
     estimator = tf.estimator.Estimator(model_fn=model_fn, model_dir="J:/BA/tmp/")
-    estimator.train(input_fn=lambda: input_fn(5, tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
+    estimator.train(input_fn=lambda: input_fn(16, tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
 
 
 if __name__ == "__main__":

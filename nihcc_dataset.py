@@ -25,8 +25,11 @@ def _read_image(filename, label):
     images_path = tf.constant("J:/BA/nihcc/images_scaled/")
     file_path = tf.string_join([images_path, filename])
     image_string = tf.read_file(file_path)
+
     image_decoded = tf.image.decode_image(image_string)
     image_decoded = tf.image.convert_image_dtype(image_decoded, tf.float32)
+    image_decoded = tf.image.per_image_standardization(image_decoded)
+    image_decoded = tf.image.random_flip_left_right(image_decoded)
     image_decoded.set_shape((224, 224, 1))
 
     return image_decoded, label
@@ -37,7 +40,7 @@ def _read_csv():
     images = []
     labels = []
 
-    csv_path = os.path.join(DATA_PATH, "Data_Entry_2017_small.csv")
+    csv_path = os.path.join(DATA_PATH, "Data_Entry_2017.csv")
     with open(csv_path) as csv_file:
 
         csv_reader = csv.DictReader(csv_file)
@@ -52,7 +55,7 @@ def _read_csv():
                 findings_vector[FINDINGS.index(finding)] = 1
 
             assert(1 in findings_vector)
-                
+
             labels.append(findings_vector)
 
     return images, labels
@@ -70,8 +73,8 @@ def create_dataset(mode):
         images = images[:fith_of_dataset * 3]
         labels = labels[:fith_of_dataset * 3]
     elif (mode == tf.estimator.ModeKeys.EVAL):
-        images = images[fith_of_dataset * 3 : fith_of_dataset * 4]
-        labels = labels[fith_of_dataset * 3 : fith_of_dataset * 4]
+        images = images[fith_of_dataset * 3: fith_of_dataset * 4]
+        labels = labels[fith_of_dataset * 3: fith_of_dataset * 4]
     elif (mode == tf.estimator.ModeKeys.PREDICT):
         images = images[fith_of_dataset * 4:]
         labels = labels[fith_of_dataset * 4:]
