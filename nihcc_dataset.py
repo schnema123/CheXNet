@@ -32,15 +32,15 @@ def _read_image(filename, label):
     image_decoded = tf.image.random_flip_left_right(image_decoded)
     image_decoded.set_shape((224, 224, 1))
 
-    return image_decoded, label
+    return tf.convert_to_tensor(image_decoded), tf.convert_to_tensor(label)
 
 
-def _read_csv():
+def _read_csv(filename):
 
     images = []
     labels = []
 
-    csv_path = os.path.join(DATA_PATH, "Data_Entry_2017.csv")
+    csv_path = os.path.join(DATA_PATH, filename)
     with open(csv_path) as csv_file:
 
         csv_reader = csv.DictReader(csv_file)
@@ -64,28 +64,22 @@ def _read_csv():
 def create_dataset(mode):
 
     # Get csv data
-    images, labels = _read_csv()
-
-    fith_of_dataset = len(images) // 5
-
-    # Split 60/20/20
     if (mode == tf.estimator.ModeKeys.TRAIN):
-        images = images[:fith_of_dataset * 3]
-        labels = labels[:fith_of_dataset * 3]
+        filename = "Data_Train.csv"
     elif (mode == tf.estimator.ModeKeys.EVAL):
-        images = images[fith_of_dataset * 3: fith_of_dataset * 4]
-        labels = labels[fith_of_dataset * 3: fith_of_dataset * 4]
+        filename = "Data_Eval.csv"
     elif (mode == tf.estimator.ModeKeys.PREDICT):
-        images = images[fith_of_dataset * 4:]
-        labels = labels[fith_of_dataset * 4:]
+        filename = "Data_Test.csv"
 
-    images = tf.convert_to_tensor(images)
-    labels = tf.convert_to_tensor(labels)
+    images, labels = _read_csv(filename)
 
     print(images)
     print(labels)
 
     ds = tf.data.Dataset.from_tensor_slices((images, labels))
     ds = ds.map(_read_image)
+
+    print(images)
+    print(labels)
 
     return ds
