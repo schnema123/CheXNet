@@ -25,8 +25,7 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-
-slim = tf.contrib.slim
+import tensorflow.contrib.slim as slim
 
 
 @slim.add_arg_scope
@@ -38,7 +37,8 @@ def _conv(inputs, num_filters, kernel_size, stride=1, dropout_rate=None,
     net = slim.conv2d(net, num_filters, kernel_size)
 
     if dropout_rate:
-      net = slim.dropout(net, dropout_rate)
+      keep_prob = 1.0 - dropout_rate
+      net = slim.dropout(net, keep_prob)
 
     net = slim.utils.collect_named_outputs(outputs_collections, sc.name, net)
 
@@ -151,16 +151,10 @@ def densenet(inputs,
         net = tf.nn.relu(net)
         net = tf.reduce_mean(net, [1,2], name='global_avg_pool', keep_dims=True) # Does global average pooling
 
-      # Replaces fully connected layer
-      net = slim.conv2d(net, num_classes, 1,
-                        biases_initializer=tf.zeros_initializer(),
-                        scope='logits')
+      net = slim.fully_connected(net, num_classes)
 
       end_points = slim.utils.convert_collection_to_dict(
           end_points_collection)
-
-      if num_classes is not None:
-        end_points['predictions'] = slim.softmax(net, scope='predictions')
 
       return net, end_points
 
@@ -174,7 +168,8 @@ def densenet121(inputs, num_classes=1000, is_training=True, reuse=None):
                   num_layers=[6,12,24,16],
                   is_training=is_training,
                   reuse=reuse,
-                  scope='densenet121')
+                  scope='densenet121',
+                  dropout_rate=0.5)
 densenet121.default_image_size = 224
 
 

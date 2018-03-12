@@ -15,7 +15,7 @@ FINDINGS_FIELD = 1
 
 FIELDS_DEFAULT = [[""] * 11]
 
-FINDINGS = ["No Finding", "Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass", "Nodule", "Pneumonia",
+FINDINGS = ["Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass", "Nodule", "Pneumonia",
             "Pneumothorax", "Consolidation", "Edema", "Emphysema", "Fibrosis", "Pleural_Thickening", "Hernia"]
 NUM_FINDINGS = len(FINDINGS)
 
@@ -52,9 +52,8 @@ def _read_csv(filename):
 
             findings_vector = [0 for _ in range(NUM_FINDINGS)]
             for finding in findings:
-                findings_vector[FINDINGS.index(finding)] = 1
-
-            assert(1 in findings_vector)
+                if finding != "No Finding":
+                    findings_vector[FINDINGS.index(finding)] = 1
 
             labels.append(findings_vector)
 

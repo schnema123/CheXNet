@@ -10,19 +10,20 @@ def model_fn(
         labels,
         mode):
 
-    tf.summary.image("image", features)
+    tf.summary.image("image", features, max_outputs=10)
 
     in_training = (mode == tf.estimator.ModeKeys.TRAIN)
     net, _ = densenet.densenet121(
-        features, num_classes=15, is_training=in_training)
+        features, num_classes=14, is_training=in_training)
 
     logits = net
-    logits = tf.reshape(logits, [-1, 15])
+    logits = tf.reshape(logits, [-1, 14])
 
     probabilities = tf.sigmoid(logits, name="probabilities")
 
     tf.identity(logits, "logits_tensor")
     tf.identity(labels, "labels_tensor")
+    tf.identity(features, "image_tensor")
 
     predictions = {
         "classes": tf.argmax(input=logits, axis=1),
@@ -42,8 +43,9 @@ def model_fn(
         tf.summary.histogram(var.name, var)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
-        optimizer = tf.train.AdamOptimizer(
-            learning_rate=0.001, beta1=0.9, beta2=0.999)
+        # optimizer = tf.train.AdamOptimizer(
+        #    learning_rate=0.001, beta1=0.9, beta2=0.999)
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
         train_op = optimizer.minimize(
             loss=loss,
             global_step=tf.train.get_global_step()
