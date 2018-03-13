@@ -1,8 +1,11 @@
 import tensorflow as tf
+import os
 import densenet
 import nihcc_dataset
 
 slim = tf.contrib.slim
+
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 def load_variables_from_checkpoint():
     checkpoint_to_load = "../imagenet_pretrained/tf-densenet121.ckpt"
@@ -17,7 +20,7 @@ def model_fn(
         labels,
         mode):
 
-    tf.summary.image("image", features, max_outputs=10)
+    tf.summary.image("image", features, max_outputs=16)
 
     in_training = (mode == tf.estimator.ModeKeys.TRAIN)
     net, _ = densenet.densenet121(
