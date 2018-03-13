@@ -76,7 +76,8 @@ def input_fn(batch_size, mode):
     """An input function for training"""
     # TODO: Do not shuffle and repeat when doing evaluation?
     ds = nihcc_dataset.create_dataset(mode)
-    ds = ds.apply(tf.contrib.data.shuffle_and_repeat(100))
+    ds = ds.shuffle(1000)
+    ds = ds.repeat()
     ds = ds.batch(batch_size)
     return ds.make_one_shot_iterator().get_next()
 
