@@ -3,15 +3,15 @@ import concurrent.futures
 
 from PIL import Image
 
-input_dir = os.fsencode("J:/BA/nihcc/images_full/")
-output_dir = os.fsencode("J:/BA/nihcc/images_scaled/")
+input_dir = os.fsencode("/mnt/diskB/ChestXrayNIHCC/images/")
+output_dir = os.fsencode("../images_scaled/")
 
-thread_pool_executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+thread_pool_executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 
 def resize_img(input_path, output_path):
     img = Image.open(input_path)
     img = img.resize((224, 224), Image.ANTIALIAS)
-    img = img.convert("RGB")
+    img = img.convert("L")
     img.save(output_path)
 
 for file in os.listdir(input_dir):
