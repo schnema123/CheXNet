@@ -13,8 +13,6 @@ TEST_DATA = "data_test.csv"
 IMAGE_FIELD = 0
 FINDINGS_FIELD = 1
 
-FIELDS_DEFAULT = [[""] * 11]
-
 FINDINGS = ["Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass", "Nodule", "Pneumonia",
             "Pneumothorax", "Consolidation", "Edema", "Emphysema", "Fibrosis", "Pleural_Thickening", "Hernia"]
 NUM_FINDINGS = len(FINDINGS)
@@ -75,7 +73,7 @@ def create_dataset(mode):
     images = tf.convert_to_tensor(images)
     labels= tf.convert_to_tensor(labels)
 
-    ds = tf.data.Dataset.from_tensor_slices((images, labels))
+    ds = tf.contrib.data.Dataset.from_tensor_slices((images, labels))
     ds = ds.map(_read_image)
 
     return ds
