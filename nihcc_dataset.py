@@ -4,7 +4,7 @@ import csv
 
 import tensorflow as tf
 
-DATA_PATH = "../nihcc/"
+DATA_PATH = "../dataset/"
 
 TRAIN_DATA = "data_train.csv"
 EVAL_DATA = "data_eval.csv"
@@ -22,7 +22,7 @@ NUM_FINDINGS = len(FINDINGS)
 
 def _read_image(filename, label):
 
-    images_path = tf.constant("J:/BA/nihcc/images_scaled/")
+    images_path = tf.constant("../images_scaled/")
     file_path = tf.string_join([images_path, filename])
     image_string = tf.read_file(file_path)
 

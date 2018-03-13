@@ -87,10 +87,10 @@ def main():
                       "logits": "logits_tensor",
                       "loss": "loss_tensor"}
     logging_hook = tf.train.LoggingTensorHook(
-        tensors=tensors_to_log, every_n_iter=1)
+        tensors=tensors_to_log, every_n_iter=100)
 
     estimator = tf.estimator.Estimator(
-        model_fn=model_fn, model_dir="J:/BA/tmp/")
+        model_fn=model_fn, model_dir="../tmp/")
 
     estimator.train(input_fn=lambda: input_fn(
         16, tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
