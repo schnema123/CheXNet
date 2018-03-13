@@ -4,6 +4,13 @@ import nihcc_dataset
 
 slim = tf.contrib.slim
 
+def load_variables_from_checkpoint():
+    checkpoint_to_load = "../imagenet_pretrained/tf-densenet121.ckpt"
+    trainable_variables = tf.trainable_variables()
+    assigment_map = {var.name.split(":")[0]: var for var in trainable_variables if not var.name.endswith("/biases:0") and "final_block" not in var.name and "fully_connected" not in var.name}
+    print(assigment_map)
+    tf.train.init_from_checkpoint(
+        checkpoint_to_load, assigment_map)
 
 def model_fn(
         features,
@@ -15,13 +22,6 @@ def model_fn(
     in_training = (mode == tf.estimator.ModeKeys.TRAIN)
     net, _ = densenet.densenet121(
         features, num_classes=14, is_training=in_training)
-
-    checkpoint_to_load = "../imagenet_pretrained/tf-densenet121.ckpt"
-    trainable_variables = tf.trainable_variables()
-    assigment_map = {var.name.split(":")[0]: var for var in trainable_variables if not var.name.endswith("/biases:0") and "final_block" not in var.name and "fully_connected" not in var.name}
-    print(assigment_map)
-    tf.train.init_from_checkpoint(
-        checkpoint_to_load, assigment_map)
 
     logits = net
     logits = tf.reshape(logits, [-1, 14])
@@ -40,8 +40,11 @@ def model_fn(
         return tf.estimator.EstimatorSpec(mode=mode, predictions=probabilities)
 
     # Calculate loss
-    loss = tf.losses.sigmoid_cross_entropy(
+    tf.losses.sigmoid_cross_entropy(
         multi_class_labels=labels, logits=logits)
+    
+    print(tf.losses.get_losses())
+    loss = tf.losses.get_total_loss()
 
     tf.identity(loss, "loss_tensor")
 
