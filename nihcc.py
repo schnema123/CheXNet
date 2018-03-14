@@ -1,9 +1,10 @@
 import tensorflow as tf
+import tensorflow.contrib.slim as slim
+import tensorflow.contrib.slim.nets as slim_nets
+
 import os
 import densenet
 import nihcc_dataset
-
-slim = tf.contrib.slim
 
 os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
@@ -23,7 +24,7 @@ def model_fn(
     tf.summary.image("image", features, max_outputs=16)
 
     in_training = (mode == tf.estimator.ModeKeys.TRAIN)
-    net, _ = densenet.densenet121(
+    net, _ = slim_nets.resnet_v2.resnet_v2_50(
         features, num_classes=14, is_training=in_training)
 
     logits = net
