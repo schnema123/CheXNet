@@ -24,13 +24,24 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import sys
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
+
+def print_var(name, value):
+  print(name + ": {}".format(value))
 
 
 @slim.add_arg_scope
 def _conv(inputs, num_filters, kernel_size, stride=1, dropout_rate=None,
           scope=None, outputs_collections=None):
+
+  print("Creating conv...")
+  print_var("num_filters", num_filters)
+  print_var("kernel_size", kernel_size)
+  print_var("stride", stride)
+  print("\n")
+
   with tf.variable_scope(scope, 'xx', [inputs]) as sc:
     net = slim.batch_norm(inputs)
     net = tf.nn.relu(net)
@@ -47,6 +58,11 @@ def _conv(inputs, num_filters, kernel_size, stride=1, dropout_rate=None,
 
 @slim.add_arg_scope
 def _conv_block(inputs, num_filters, scope=None, outputs_collections=None):
+
+  print("Creating conv block...")
+  print_var("num_filters", num_filters)
+  print("\n")
+
   with tf.variable_scope(scope, 'conv_blockx', [inputs]) as sc:
     net = inputs
     # Bottleneck layer
@@ -62,6 +78,12 @@ def _conv_block(inputs, num_filters, scope=None, outputs_collections=None):
 @slim.add_arg_scope
 def _dense_block(inputs, num_layers, num_filters, growth_rate,
                  grow_num_filters=True, scope=None, outputs_collections=None):
+
+  print("Creating dense block...")
+  print_var("num_filters", num_filters)
+  print_var("growth_rate", growth_rate)
+  print_var("grow_num_filters", grow_num_filters)
+  print("\n")
 
   with tf.variable_scope(scope, 'dense_blockx', [inputs]) as sc:
     net = inputs
@@ -80,6 +102,11 @@ def _dense_block(inputs, num_layers, num_filters, growth_rate,
 @slim.add_arg_scope
 def _transition_block(inputs, num_filters, compression=1.0,
                       scope=None, outputs_collections=None):
+
+  print("Creating transition block...")
+  print_var("num_filters", num_filters)
+  print_var("compression", compression)
+  print("\n")
 
   num_filters = int(num_filters * compression)
   with tf.variable_scope(scope, 'transition_blockx', [inputs]) as sc:
@@ -108,6 +135,16 @@ def densenet(inputs,
   assert num_filters is not None
   assert num_layers is not None
 
+  print("Creating densenet...")
+  print_var("reduction", reduction)
+  print_var("growth_rate", growth_rate)
+  print_var("num_filters", num_filters)
+  print_var("num_layers", num_layers)
+  print_var("dropout_rate", dropout_rate)
+  print_var("is_training", is_training)
+  print_var("reuse", reuse)
+  print("\n")
+
   compression = 1.0 - reduction
   num_dense_blocks = len(num_layers)
 
@@ -126,6 +163,7 @@ def densenet(inputs,
       net = slim.conv2d(net, num_filters, 7, stride=2, scope='conv1')
       net = slim.batch_norm(net)
       net = tf.nn.relu(net)
+
       net = slim.max_pool2d(net, 3, stride=2, padding='SAME')
 
       # blocks
@@ -159,7 +197,7 @@ def densenet(inputs,
       return net, end_points
 
 
-def densenet121(inputs, num_classes=1000, is_training=True, reuse=None):
+def densenet121(inputs, num_classes=1000, is_training=True, reuse=None, dropout_rate=None):
   return densenet(inputs,
                   num_classes=num_classes, 
                   reduction=0.5,
@@ -169,7 +207,7 @@ def densenet121(inputs, num_classes=1000, is_training=True, reuse=None):
                   is_training=is_training,
                   reuse=reuse,
                   scope='densenet121',
-                  dropout_rate=0.5)
+                  dropout_rate=dropout_rate)
 densenet121.default_image_size = 224
 
 

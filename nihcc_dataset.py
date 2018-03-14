@@ -1,14 +1,7 @@
 import os
 import csv
 
-
 import tensorflow as tf
-
-DATA_PATH = "../dataset/"
-
-TRAIN_DATA = "data_train.csv"
-EVAL_DATA = "data_eval.csv"
-TEST_DATA = "data_test.csv"
 
 IMAGE_FIELD = 0
 FINDINGS_FIELD = 1
@@ -26,8 +19,10 @@ def _read_image(filename, label):
 
     image_decoded = tf.image.decode_image(image_string)
     image_decoded = tf.image.convert_image_dtype(image_decoded, tf.float32)
+
     image_decoded = tf.image.per_image_standardization(image_decoded)
     image_decoded = tf.image.random_flip_left_right(image_decoded)
+
     image_decoded.set_shape([224, 224, 3])
 
     return image_decoded, label
@@ -38,8 +33,7 @@ def _read_csv(filename):
     images = []
     labels = []
 
-    csv_path = os.path.join(DATA_PATH, filename)
-    with open(csv_path) as csv_file:
+    with open(filename) as csv_file:
 
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
@@ -62,18 +56,29 @@ def create_dataset(mode):
 
     # Get csv data
     if (mode == tf.estimator.ModeKeys.TRAIN):
-        filename = "Data_Train.csv"
+        filename = "../dataset/Data_Train.csv"
     elif (mode == tf.estimator.ModeKeys.EVAL):
-        filename = "Data_Eval.csv"
+        filename = "../dataset/Data_Eval.csv"
     elif (mode == tf.estimator.ModeKeys.PREDICT):
-        filename = "Data_Test.csv"
+        filename = "../dataset/Data_Test.csv"
 
+    # Reads image file names and labels
     images, labels = _read_csv(filename)   
 
     images = tf.convert_to_tensor(images)
     labels= tf.convert_to_tensor(labels)
 
     ds = tf.contrib.data.Dataset.from_tensor_slices((images, labels))
-    ds = ds.map(_read_image)
+
+    # TODO: Look into shuffling and then repeating vs vice versa
+    # Shuffle the dataset
+    ds = ds.shuffle()
+
+    # If we are training, repeat the dataset infinitely
+    if (mode == tf.estimator.ModeKeys.TRAIN):
+        ds = ds.repeat()
+    
+    ds = ds.map(_read_image, num_parallel_calls=10, output_buffer_size=10)
+    ds = ds.batch(16)
 
     return ds

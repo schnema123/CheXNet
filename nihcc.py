@@ -5,16 +5,20 @@ import tensorflow.contrib.slim.nets as slim_nets
 import os
 import densenet
 import nihcc_dataset
+import nihcc_utils
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 
 def load_variables_from_checkpoint():
     checkpoint_to_load = "../imagenet_pretrained/tf-densenet121.ckpt"
     trainable_variables = tf.trainable_variables()
-    assigment_map = {var.name.split(":")[0]: var for var in trainable_variables if not var.name.endswith("/biases:0") and "final_block" not in var.name and "fully_connected" not in var.name}
+    assigment_map = {var.name.split(":")[0]: var for var in trainable_variables if not var.name.endswith(
+        "/biases:0") and "final_block" not in var.name and "fully_connected" not in var.name}
     print(assigment_map)
     tf.train.init_from_checkpoint(
         checkpoint_to_load, assigment_map)
+
 
 def model_fn(
         features,
@@ -37,7 +41,7 @@ def model_fn(
     tf.identity(features, "image_tensor")
 
     predictions = {
-        "classes": tf.argmax(input=logits, axis=1),
+        "classes": tf.greater(probabilities, 0.5),
         "probabilities": probabilities
     }
     if mode == tf.estimator.ModeKeys.PREDICT:
@@ -46,7 +50,7 @@ def model_fn(
     # Calculate loss
     tf.losses.sigmoid_cross_entropy(
         multi_class_labels=labels, logits=logits)
-    
+
     print(tf.losses.get_losses())
     loss = tf.losses.get_total_loss()
 
@@ -73,13 +77,9 @@ def model_fn(
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
 
-def input_fn(batch_size, mode):
+def input_fn(mode):
     """An input function for training"""
-    # TODO: Do not shuffle and repeat when doing evaluation?
     ds = nihcc_dataset.create_dataset(mode)
-    ds = ds.shuffle(1000)
-    ds = ds.repeat()
-    ds = ds.batch(batch_size)
     return ds.make_one_shot_iterator().get_next()
 
 
@@ -92,13 +92,13 @@ def main():
                       "logits": "logits_tensor",
                       "loss": "loss_tensor"}
     logging_hook = tf.train.LoggingTensorHook(
-        tensors=tensors_to_log, every_n_iter=100)
+        tensors=tensors_to_log, every_n_iter=1000)
 
     estimator = tf.estimator.Estimator(
         model_fn=model_fn, model_dir="../tmp/")
 
-    estimator.train(input_fn=lambda: input_fn(
-        16, tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
+    estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook], saving_listeners=[
+                    nihcc_utils.CheckPointSaverListener(estimator, lambda: input_fn(tf.estimator.ModeKeys.EVAL))])
 
 
 if __name__ == "__main__":
