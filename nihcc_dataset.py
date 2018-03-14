@@ -23,7 +23,7 @@ def _read_image(filename, label):
     image_decoded = tf.image.per_image_standardization(image_decoded)
     image_decoded = tf.image.random_flip_left_right(image_decoded)
 
-    image_decoded.set_shape([224, 224, 3])
+    image_decoded.set_shape([224, 224, 1])
 
     return image_decoded, label
 
@@ -72,13 +72,13 @@ def create_dataset(mode):
 
     # TODO: Look into shuffling and then repeating vs vice versa
     # Shuffle the dataset
-    ds = ds.shuffle()
+    ds = ds.shuffle(1000)
 
     # If we are training, repeat the dataset infinitely
     if (mode == tf.estimator.ModeKeys.TRAIN):
         ds = ds.repeat()
     
-    ds = ds.map(_read_image, num_parallel_calls=10, output_buffer_size=10)
+    ds = ds.map(_read_image, num_threads=10, output_buffer_size=10)
     ds = ds.batch(16)
 
     return ds

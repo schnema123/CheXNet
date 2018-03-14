@@ -97,9 +97,15 @@ def main():
     estimator = tf.estimator.Estimator(
         model_fn=model_fn, model_dir="../tmp/")
 
-    estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook], saving_listeners=[
-                    nihcc_utils.CheckPointSaverListener(estimator, lambda: input_fn(tf.estimator.ModeKeys.EVAL))])
+    print("Training for 100 steps...")
+    estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), steps=100, hooks=[logging_hook])
+    print("Done training.")
 
+    print("Evaluating model...")
+    eval_results = estimator.evaluate(input_fn=lambda: input_fn(tf.estimator.ModeKeys.EVAL))
+    print("Done evaluating model.")
+
+    print(eval_results)
 
 if __name__ == "__main__":
     main()

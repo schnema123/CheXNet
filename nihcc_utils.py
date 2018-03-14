@@ -14,4 +14,3 @@ class CheckPointSaverListener(tf.train.CheckpointSaverListener):
         # Evaluate model for this checkpoint
         # Create and save ROC-Curve
         # Calculate AUC
-
