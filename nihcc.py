@@ -103,19 +103,19 @@ def main():
     estimator = tf.estimator.Estimator(
         model_fn=model_fn, model_dir="../tmp/")
 
-    while True:
-        print("Training for one epoch...")
-        estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
-        print("Done training.")
+    #while True:
+    #    print("Training for one epoch...")
+    #    estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
+    #    print("Done training.")
 
-        print("Evaluating model...")
-        eval_results = estimator.evaluate(input_fn=lambda: input_fn(tf.estimator.ModeKeys.EVAL))
-        print(eval_results)
-        print("Done evaluating model.")
+    #    print("Evaluating model...")
+    #    eval_results = estimator.evaluate(input_fn=lambda: input_fn(tf.estimator.ModeKeys.EVAL))
+    #    print(eval_results)
+    #    print("Done evaluating model.")
 
-    #print("Printing ROC Curve...")
-    #nihcc_plot.plot_roc(input_fn, model_fn)
-    #print("Done printing ROC Curve")
+    print("Printing ROC Curve...")
+    nihcc_plot.plot_roc(input_fn, model_fn)
+    print("Done printing ROC Curve")
 
 if __name__ == "__main__":
     main()
