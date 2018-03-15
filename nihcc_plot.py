@@ -10,10 +10,17 @@ def _plot(labels, predictions, filename):
     tpr = dict()
     roc_auc = dict()
 
+    print(labels)
+    print(predictions)
+
     n_classes = 14
     for x in range(n_classes):
         label = labels[:, x]
         prediction = predictions[:, x]
+
+        print("Printing class {}".format(x))
+        print(label)
+        print(prediction)
 
         fpr[x], tpr[x], _ = sk.metrics.roc_curve(label, prediction)
         roc_auc[x] = sk.metrics.auc(fpr[x], tpr[x])
