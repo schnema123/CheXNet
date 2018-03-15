@@ -36,6 +36,7 @@ def model_fn(
     logits = tf.reshape(logits, [-1, 14])
 
     probabilities = tf.sigmoid(logits, name="probabilities")
+    probabilities = tf.Print(probabilities, [logits, probabilities])
 
     tf.identity(logits, "logits_tensor")
     tf.identity(labels, "labels_tensor")
