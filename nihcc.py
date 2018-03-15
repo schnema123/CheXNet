@@ -49,8 +49,12 @@ def model_fn(
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Calculate loss
+    weights_constant = tf.constant([5.0] * 14, dtype=tf.float32)
+    weights_labels = tf.cast(labels, tf.float32)
+    weights = tf.multiply(weights_labels, weights_constant)
+
     tf.losses.sigmoid_cross_entropy(
-        multi_class_labels=labels, logits=logits)
+        multi_class_labels=labels, logits=logits, weights=weights)
 
     print(tf.losses.get_losses())
     loss = tf.losses.get_total_loss()
@@ -99,20 +103,20 @@ def main():
     estimator = tf.estimator.Estimator(
         model_fn=model_fn, model_dir="../tmp/")
 
-    #print("Training")
-    #estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), steps=100, hooks=[logging_hook])
-    #print("Done training.")
+    print("Training")
+    estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), steps=100, hooks=[logging_hook])
+    print("Done training.")
 
-    eval_input_fn = lambda: input_fn(tf.estimator.ModeKeys.EVAL)
+    # eval_input_fn = lambda: input_fn(tf.estimator.ModeKeys.EVAL)
 
-    print("Evaluating model...")
-    eval_results = estimator.evaluate(input_fn=eval_input_fn)
-    print(eval_results)
-    print("Done evaluating model.")
+    #print("Evaluating model...")
+    #eval_results = estimator.evaluate(input_fn=eval_input_fn)
+    #print(eval_results)
+    #print("Done evaluating model.")
 
-    print("Printing ROC Curve...")
-    nihcc_plot.plot_roc(input_fn, model_fn)
-    print("Done printing ROC Curve")
+    #print("Printing ROC Curve...")
+    #nihcc_plot.plot_roc(input_fn, model_fn)
+    #print("Done printing ROC Curve")
 
 if __name__ == "__main__":
     main()
