@@ -1,5 +1,6 @@
 import tensorflow as tf
 import sklearn as sk
+import sklearn.metrics
 import matplotlib.pyplot as plt
 import numpy as np
 
