@@ -104,15 +104,13 @@ def main():
         model_fn=model_fn, model_dir="../tmp/")
 
     print("Training")
-    estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), steps=100, hooks=[logging_hook])
+    estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), steps=1000, hooks=[logging_hook])
     print("Done training.")
 
-    # eval_input_fn = lambda: input_fn(tf.estimator.ModeKeys.EVAL)
-
-    #print("Evaluating model...")
-    #eval_results = estimator.evaluate(input_fn=eval_input_fn)
-    #print(eval_results)
-    #print("Done evaluating model.")
+    print("Evaluating model...")
+    eval_results = estimator.evaluate(input_fn=lambda: input_fn(tf.estimator.ModeKeys.EVAL))
+    print(eval_results)
+    print("Done evaluating model.")
 
     #print("Printing ROC Curve...")
     #nihcc_plot.plot_roc(input_fn, model_fn)
