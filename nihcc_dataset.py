@@ -72,12 +72,11 @@ def create_dataset(mode):
 
     # TODO: Look into shuffling and then repeating vs vice versa
     # Shuffle the dataset
-    ds = ds.shuffle(1000)
 
-    # If we are training, repeat the dataset infinitely
-    if (mode == tf.estimator.ModeKeys.TRAIN):
-        ds = ds.repeat()
-    
+    # if (mode == tf.estimator.ModeKeys.TRAIN):
+    #   ds = ds.repeat(2)
+
+    ds = ds.shuffle(100000)
     ds = ds.map(_read_image, num_threads=10, output_buffer_size=10)
     ds = ds.batch(16)
 
