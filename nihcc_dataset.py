@@ -23,7 +23,7 @@ def _read_image(filename, label):
     image_decoded = tf.image.per_image_standardization(image_decoded)
     image_decoded = tf.image.random_flip_left_right(image_decoded)
 
-    image_decoded.set_shape([224, 224, 1])
+    image_decoded.set_shape([224, 224, 3])
 
     return image_decoded, label
 
@@ -58,7 +58,7 @@ def create_dataset(mode):
     if (mode == tf.estimator.ModeKeys.TRAIN):
         filename = "../dataset/Data_Train.csv"
     elif (mode == tf.estimator.ModeKeys.EVAL):
-        filename = "../dataset/Data_Eval.csv"
+        filename = "../dataset/Data_Eval_Small.csv"
     elif (mode == tf.estimator.ModeKeys.PREDICT):
         filename = "../dataset/Data_Test.csv"
 

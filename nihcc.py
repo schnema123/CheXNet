@@ -6,6 +6,7 @@ import os
 import densenet
 import nihcc_dataset
 import nihcc_utils
+import nihcc_plot
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -42,10 +43,10 @@ def model_fn(
 
     predictions = {
         "classes": tf.greater(probabilities, 0.5),
-        "probabilities": probabilities
+        "probabilities": probabilities,
     }
     if mode == tf.estimator.ModeKeys.PREDICT:
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=probabilities)
+        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Calculate loss
     tf.losses.sigmoid_cross_entropy(
@@ -72,7 +73,8 @@ def model_fn(
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])
+        "accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"]),
+        "auc": tf.metrics.auc(labels=labels, predictions=predictions["probabilities"])
     }
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
@@ -97,15 +99,18 @@ def main():
     estimator = tf.estimator.Estimator(
         model_fn=model_fn, model_dir="../tmp/")
 
-    print("Training for 100 steps...")
-    estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), steps=100, hooks=[logging_hook])
-    print("Done training.")
+    #print("Training")
+    #estimator.train(input_fn=lambda: input_fn(tf.estimator.ModeKeys.TRAIN), steps=100, hooks=[logging_hook])
+    #print("Done training.")
 
     print("Evaluating model...")
-    eval_results = estimator.evaluate(input_fn=lambda: input_fn(tf.estimator.ModeKeys.EVAL))
+    eval_results = estimator.evaluate(input_fn=input_fn)
+    print(eval_results)
     print("Done evaluating model.")
 
-    print(eval_results)
+    print("Printing ROC Curve...")
+    nihcc_plot.plot_roc(input_fn, model_fn)
+    print("Done printing ROC Curve")
 
 if __name__ == "__main__":
     main()
