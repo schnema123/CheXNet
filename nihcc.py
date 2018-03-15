@@ -49,12 +49,12 @@ def model_fn(
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Calculate loss
-    weights_constant = tf.constant([2.0] * 14, dtype=tf.float32)
-    weights_labels = tf.cast(labels, tf.float32)
-    weights = tf.multiply(weights_labels, weights_constant)
+    # weights_constant = tf.constant([2.0] * 14, dtype=tf.float32)
+    # weights_labels = tf.cast(labels, tf.float32)
+    # weights = tf.multiply(weights_labels, weights_constant)
 
     tf.losses.sigmoid_cross_entropy(
-        multi_class_labels=labels, logits=logits, weights=weights)
+        multi_class_labels=labels, logits=logits)
 
     print(tf.losses.get_losses())
     loss = tf.losses.get_total_loss()
