@@ -59,7 +59,7 @@ def create_dataset(mode):
     if (mode == tf.estimator.ModeKeys.TRAIN):
         filename = "../dataset/Data_Train.csv"
     elif (mode == tf.estimator.ModeKeys.EVAL):
-        filename = "../dataset/Data_Eval_Small.csv"
+        filename = "../dataset/Data_Eval.csv"
     elif (mode == tf.estimator.ModeKeys.PREDICT):
         filename = "../dataset/Data_Test.csv"
 

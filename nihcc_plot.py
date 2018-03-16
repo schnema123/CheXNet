@@ -54,16 +54,16 @@ def _create_or_append(arr, val):
 
 def plot_roc():
     
-    # Get eval dataset
-    features, labels = nihcc_input.input_fn(tf.estimator.ModeKeys.EVAL)
-
-    # Rebuild model
-    model = nihcc_model.model_fn(features, labels, tf.estimator.ModeKeys.PREDICT)
-    predictions = model.predictions
-
-    saver = tf.train.Saver()
     with tf.Session() as sess:
 
+        # Get eval dataset
+        features, labels = nihcc_input.input_fn(tf.estimator.ModeKeys.TRAIN)
+
+        # Rebuild model 
+        model = nihcc_model.model_fn(features, labels, tf.estimator.ModeKeys.PREDICT)
+        predictions = model.predictions
+
+        saver = tf.train.Saver()
         checkpoint = tf.train.latest_checkpoint("../tmp/")
         saver.restore(sess, checkpoint)
 

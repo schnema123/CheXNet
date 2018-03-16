@@ -2,6 +2,9 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import tensorflow.contrib.slim.nets as slim_nets
 
+import densenet
+import densenet_new
+
 
 def load_variables_from_checkpoint():
     checkpoint_to_load = "../imagenet_pretrained/tf-densenet121.ckpt"
@@ -25,14 +28,17 @@ def model_fn(
     tf.summary.image("image", image, max_outputs=16)
 
     in_training = (mode == tf.estimator.ModeKeys.TRAIN)
-    net, _ = slim_nets.resnet_v2.resnet_v2_50(
-        image, num_classes=14, is_training=in_training)
+    net = densenet_new.densenet121(
+        image, num_classes=14, in_training=in_training)
 
     logits = net
     logits = tf.reshape(logits, [-1, 14])
 
-    # with (tf.control_dependencies([tf.add_check_numerics_ops()])):
-    probabilities = tf.sigmoid(logits, name="probabilities")
+    # logits = tf.Print(logits, [image], summarize=1000000, message="image")
+    # logits = tf.Print(logits, [labels], summarize=1000, message="labels")
+    # logits = tf.Print(logits, [logits], summarize=1000, message="logits")
+    with (tf.control_dependencies([tf.add_check_numerics_ops()])):
+        probabilities = tf.sigmoid(logits, name="probabilities")
 
     tf.identity(logits, "logits_tensor")
     tf.identity(labels, "labels_tensor")
