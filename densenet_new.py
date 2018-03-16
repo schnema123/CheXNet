@@ -69,7 +69,7 @@ def densenet121(inputs, num_classes,
         net = tf.reduce_mean(net, [1, 2], name="global_avg_pool")
 
         # TODO: Remove this?
-        net = tf.layers.flatten(net)
+        net = tf.contrib.layers.flatten(net)
         # TODO: Activation function?
         net = tf.layers.dense(net, num_classes)
 
