@@ -23,7 +23,7 @@ def _read_image(filename, label):
     image_decoded = tf.image.per_image_standardization(image_decoded)
     image_decoded = tf.image.random_flip_left_right(image_decoded)
 
-    image_decoded.set_shape([224, 224, 3])
+    image_decoded.set_shape([224, 224, 1])
 
     return image_decoded, label
 
@@ -49,6 +49,7 @@ def _read_csv(filename):
 
             labels.append(findings_vector)
 
+    print("[*] {} labels and {} images in {}".format(len(labels), len(labels), filename))
     return images, labels
 
 
@@ -73,11 +74,17 @@ def create_dataset(mode):
     # TODO: Look into shuffling and then repeating vs vice versa
     # Shuffle the dataset
 
-    # if (mode == tf.estimator.ModeKeys.TRAIN):
-    #   ds = ds.repeat(2)
+    if (mode == tf.estimator.ModeKeys.TRAIN):
+      ds = ds.repeat(2)
 
     ds = ds.shuffle(100000)
     ds = ds.map(_read_image, num_threads=10, output_buffer_size=10)
     ds = ds.batch(16)
 
     return ds
+
+
+def input_fn(mode):
+    """An input function for training"""
+    ds = create_dataset(mode)
+    return ds.make_one_shot_iterator().get_next()

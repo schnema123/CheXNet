@@ -1,3 +1,6 @@
+import nihcc_model
+import nihcc_input
+
 import tensorflow as tf
 import sklearn as sk
 import sklearn.metrics
@@ -49,24 +52,24 @@ def _create_or_append(arr, val):
     else:
         return np.append(arr, val, axis=0)
 
-def plot_roc(input_fn, model_fn):
+def plot_roc():
     
     # Get eval dataset
-    features, labels = input_fn(tf.estimator.ModeKeys.EVAL)
+    features, labels = nihcc_input.input_fn(tf.estimator.ModeKeys.EVAL)
 
     # Rebuild model
-    model = model_fn(features, labels, tf.estimator.ModeKeys.PREDICT)
+    model = nihcc_model.model_fn(features, labels, tf.estimator.ModeKeys.PREDICT)
     predictions = model.predictions
 
     saver = tf.train.Saver()
     with tf.Session() as sess:
 
         checkpoint = tf.train.latest_checkpoint("../tmp/")
-
         saver.restore(sess, checkpoint)
 
         prediction_values = None
         label_values = None
+        batch_nr = 0
 
         while True:
             try:
@@ -75,10 +78,15 @@ def plot_roc(input_fn, model_fn):
                 prediction_values = _create_or_append(prediction_values, preds["probabilities"])
                 label_values = _create_or_append(label_values, lbls)
 
+                batch_nr = batch_nr + 1
+                print("Done with batch no. {}".format(batch_nr))
+
             except tf.errors.OutOfRangeError:
                 break
 
         _plot(label_values, prediction_values, checkpoint + ".png")
-        
 
 
+print("Printing ROC Curve...")
+plot_roc()
+print("Done printing ROC Curve")
