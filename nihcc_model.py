@@ -21,9 +21,9 @@ def model_fn(
         labels,
         mode):
 
-    image = features
-    image = tf.reshape(image, [-1, 224, 224])
-    image = tf.stack([image, image, image], axis=3)
+    image = features["input_1"]
+    # image = tf.reshape(image, [-1, 224, 224])
+    # image = tf.stack([image, image, image], axis=3)
 
     tf.summary.image("image", image, max_outputs=16)
 

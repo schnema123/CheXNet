@@ -23,6 +23,8 @@ def _read_image(filename, label):
     image_decoded = tf.image.per_image_standardization(image_decoded)
     image_decoded = tf.image.random_flip_left_right(image_decoded)
 
+    # image_decoded = tf.reshape(image, [-1, 224, 224])
+    # image_decoded = tf.stack([image, image, image], axis=3)
     image_decoded.set_shape([224, 224, 1])
 
     return image_decoded, label
@@ -87,4 +89,5 @@ def create_dataset(mode):
 def input_fn(mode):
     """An input function for training"""
     ds = create_dataset(mode)
-    return ds.make_one_shot_iterator().get_next()
+    features, labels = ds.make_one_shot_iterator().get_next()
+    return {"input_1": features}, labels

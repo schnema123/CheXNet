@@ -22,16 +22,16 @@ def main():
     logging_hook = tf.train.LoggingTensorHook(
         tensors=tensors_to_log, every_n_iter=1000)
 
-    # estimator = tf.estimator.Estimator(
-    #    model_fn=nihcc_model.model_fn, model_dir="../tmp/")
+    estimator = tf.estimator.Estimator(
+      model_fn=nihcc_model.model_fn, model_dir="../tmp/")
 
-    densenet121 = tf.contrib.keras.applications.DenseNet121(classes=14, weights=None)
-    densenet121.compile(optimizer="adam", loss=binary_crossentropy)
-    estimator = tf.contrib.keras.estimator.model_to_estimator(densenet121, model_dir="../tmp/")
+    #  densenet121 = tf.keras.applications.DenseNet121(classes=14, weights=None)
+    #  densenet121.compile(optimizer="adam", loss=binary_crossentropy)
+    #  estimator = tf.keras.estimator.model_to_estimator(densenet121, model_dir="../tmp/")
 
     while True:
         print("Training for one epoch...")
-        estimator.train(input_fn=lambda: nihcc_input.input_fn(tf.estimator.ModeKeys.TRAIN), hooks=[logging_hook])
+        estimator.train(input_fn=lambda: nihcc_input.input_fn(tf.estimator.ModeKeys.TRAIN))
         print("Done training.")
         
         print("Evaluating model...")

@@ -36,10 +36,6 @@ import sys
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-def print_var(name, value):
-  print(name + ": {}".format(value))
-
-
 @slim.add_arg_scope
 def _conv(inputs, num_filters, kernel_size, stride=1, dropout_rate=None,
           scope=None, outputs_collections=None):
@@ -150,15 +146,20 @@ def densenet(inputs,
                                         growth_rate,
                                         scope='dense_block' + str(i+1))
 
+        print(num_filters)
+
         # Add transition_block
         net, num_filters = _transition_block(net, num_filters,
                                              compression=compression,
                                              scope='transition_block' + str(i+1))
+        print(num_filters)
 
       net, num_filters = _dense_block(
               net, num_layers[-1], num_filters,
               growth_rate,
               scope='dense_block' + str(num_dense_blocks))
+
+      print(num_filters)
 
       # final blocks
       with tf.variable_scope('final_block', [inputs]):

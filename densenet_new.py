@@ -10,15 +10,15 @@ def _conv(x, num_filters, kernel_size, stride, in_training, name):
 def _conv_block(x, num_filters, kernel_size, stride, in_training, name):
     with tf.variable_scope(name):
         y = x
-        y = _conv(x, 4 * num_filters, 1, 1, in_training, "conv_1")
-        y = _conv(x,     num_filters, 3, 1, in_training, "conv_2")
+        y = _conv(y, 4 * num_filters, 1, 1, in_training, "conv_1")
+        y = _conv(y,     num_filters, 3, 1, in_training, "conv_2")
         y = tf.concat([x, y], axis=3)
         return y
 
 def _dense_block(x, num_layers, num_filters, growth_rate, in_training, name):
     with tf.variable_scope(name):
         for i in range(num_layers):
-            x = _conv_block(x, num_filters, 1, 1, in_training, "conv_block" + str(i))
+            x = _conv_block(x, growth_rate, 1, 1, in_training, "conv_block" + str(i))
             num_filters += growth_rate
         return x, num_filters
 
@@ -37,9 +37,9 @@ def densenet121(inputs, num_classes,
     name="densenet121"):
 
     with tf.variable_scope(name):
-        # Initial convolution
         net = inputs
         
+        # Initial convolution
         net = tf.layers.conv2d(net, num_filters, 7, 2, padding="same", name="initial_conv")
         net = tf.layers.batch_normalization(net, name="batch_norm", training=in_training)
         net = tf.nn.relu(net, name="relu")
@@ -49,8 +49,6 @@ def densenet121(inputs, num_classes,
 
         # Dense blocks
         # 6 -> 12 -> 24 -> 16
-
-        # TODO (Possible bug!): Should we not save the 
 
         net, num_filters = _dense_block(net, 6, num_filters, growth_rate, in_training, "dense_block1")
         net, num_filters = _transition_block(net, num_filters, compression, in_training, "transition_block1")
@@ -63,7 +61,8 @@ def densenet121(inputs, num_classes,
 
         net, num_filters = _dense_block(net, 16, num_filters, growth_rate, in_training, "dense_block4")
 
-        # TODO (Possible bug!): Add batch_norm + relu here?
+        net = tf.layers.batch_normalization(net)
+        net = tf.nn.relu(net)
 
         # Do global average pooling
         net = tf.reduce_mean(net, [1, 2], name="global_avg_pool")
