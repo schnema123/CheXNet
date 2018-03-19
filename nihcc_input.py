@@ -1,5 +1,6 @@
 import os
 import csv
+import random
 
 import tensorflow as tf
 
@@ -35,23 +36,45 @@ def _read_csv(filename):
     images = []
     labels = []
 
+    # Probability that a no-finding case will be thrown away
+    throw_away_no_finding = 0.8
+    
+    num_no_finding = 0
+    num_finding = dict()
+    for finding in FINDINGS:
+        num_finding[finding] = 0
+
     with open(filename) as csv_file:
 
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
-            images.append(row["Image Index"])
 
             # Make vector of labels
             findings = row["Finding Labels"].split("|")
 
+            throw_away_image = False
+
             findings_vector = [0 for _ in range(NUM_FINDINGS)]
             for finding in findings:
-                if finding != "No Finding":
+                if finding == "No Finding":
+                    if random.random() > throw_away_no_finding:
+                        num_no_finding += 1
+                    else:
+                        throw_away_image = True
+                else:
+                    num_finding[finding] += 1
                     findings_vector[FINDINGS.index(finding)] = 1
-
-            labels.append(findings_vector)
+            
+            if not throw_away_image:
+                images.append(row["Image Index"])
+                labels.append(findings_vector)
 
     print("[*] {} labels and {} images in {}".format(len(labels), len(labels), filename))
+    print("[*] Number of findings:")
+    print("[*] No Finding: {}".format(num_no_finding))
+    for finding in FINDINGS:
+        print("[*] {}: {}".format(finding, num_finding[finding]))
+
     return images, labels
 
 
