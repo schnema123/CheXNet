@@ -1,41 +1,34 @@
 import nihcc_model
 import nihcc_input
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import sklearn as sk
 import sklearn.metrics
-import matplotlib.pyplot as plt
 import numpy as np
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
+FINDINGS = ["Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass", "Nodule", "Pneumonia",
+            "Pneumothorax", "Consolidation", "Edema", "Emphysema", "Fibrosis", "Pleural_Thickening", "Hernia"]
+NUM_FINDINGS = len(FINDINGS)
 
 def _plot(labels, predictions, filename):
 
-    fpr = dict()
-    tpr = dict()
-    roc_auc = dict()
+    plt.figure(figsize=(10, 10))    
 
-    print(labels)
-    print(predictions)
-
-    n_classes = 14
-    for x in range(n_classes):
+    for x in range(NUM_FINDINGS):
         label = labels[:, x]
         prediction = predictions[:, x]
 
-        print("Printing class {}".format(x))
-        print(label)
-        print(prediction)
+        fpr, tpr, _ = sk.metrics.roc_curve(label, prediction)
+        roc_auc = sk.metrics.auc(fpr, tpr)
+        plt.plot(fpr, tpr, label="{} (area = {:.2f})".format(FINDINGS[x], roc_auc), lw=1)
 
-        fpr[x], tpr[x], _ = sk.metrics.roc_curve(label, prediction)
-        roc_auc[x] = sk.metrics.auc(fpr[x], tpr[x])
-
-    plt.figure()
-
-    lw = 2
-    
-    for x in range(n_classes):
-        plt.plot(fpr[x], tpr[x], label='ROC curve (area = %0.2f)' % roc_auc[x], lw=lw)
-
-    plt.plot([0, 1], [0, 1], color='navy', linestyle='--', lw=2)
+    plt.plot([0, 1], [0, 1], color='navy', linestyle='--', lw=1)
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.0])
     plt.xlabel('False Positive Rate')
@@ -43,7 +36,7 @@ def _plot(labels, predictions, filename):
     plt.title('Receiver operating characteristic example')
     plt.legend(loc="lower right")
     
-    plt.savefig("../tmp/" + filename)
+    plt.savefig("../src/" + filename)
 
 
 def _create_or_append(arr, val):
@@ -57,7 +50,7 @@ def plot_roc():
     with tf.Session() as sess:
 
         # Get eval dataset
-        features, labels = nihcc_input.input_fn(tf.estimator.ModeKeys.TRAIN)
+        features, labels = nihcc_input.input_fn(tf.estimator.ModeKeys.PREDICT)
 
         # Rebuild model 
         model = nihcc_model.model_fn(features, labels, tf.estimator.ModeKeys.PREDICT)
@@ -69,7 +62,6 @@ def plot_roc():
 
         prediction_values = None
         label_values = None
-        batch_nr = 0
 
         while True:
             try:
@@ -77,9 +69,6 @@ def plot_roc():
 
                 prediction_values = _create_or_append(prediction_values, preds["probabilities"])
                 label_values = _create_or_append(label_values, lbls)
-
-                batch_nr = batch_nr + 1
-                print("Done with batch no. {}".format(batch_nr))
 
             except tf.errors.OutOfRangeError:
                 break
