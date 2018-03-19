@@ -27,7 +27,8 @@ def model_fn(
 
     tf.summary.image("image", image, max_outputs=16)
 
-    in_training = (mode == tf.estimator.ModeKeys.TRAIN)
+    # in_training = (mode == tf.estimator.ModeKeys.TRAIN)
+    in_training = True
     net = densenet_new.densenet121(
         image, num_classes=14, in_training=in_training)
 
@@ -70,14 +71,18 @@ def model_fn(
         tf.summary.histogram(name, var)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
+        
         optimizer = tf.train.AdamOptimizer(
             learning_rate=0.001, beta1=0.9, beta2=0.999)
         # optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
-        train_op = optimizer.minimize(
-            loss=loss,
-            global_step=tf.train.get_global_step()
-        )
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            train_op = optimizer.minimize(
+                loss=loss,
+                global_step=tf.train.get_global_step()
+            )
+            return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     eval_metric_ops = {
         "accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"]),
