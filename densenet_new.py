@@ -7,7 +7,7 @@ def _conv(x, num_filters, kernel_size, stride, in_training, dropout_rate, name):
         x = tf.layers.conv2d(x, num_filters, kernel_size, stride, padding="same", name="conv")
 
         if dropout_rate is not None:
-            x = tf.layers.dropout(x, dropout_rate)
+            x = tf.layers.dropout(x, dropout_rate, training=in_training)
 
         return x
 
@@ -37,7 +37,7 @@ def densenet121(inputs, num_classes,
     num_filters = 64,
     growth_rate = 32,
     compression = 0.5,
-    dropout_rate = 0.5,
+    dropout_rate = 0.2,
     in_training = True,
     name="densenet121"):
 
