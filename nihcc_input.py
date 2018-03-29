@@ -96,15 +96,12 @@ def create_dataset(mode):
 
     ds = tf.contrib.data.Dataset.from_tensor_slices((images, labels))
 
-    # TODO: Look into shuffling and then repeating vs vice versa
-    # Shuffle the dataset
-
-    if (mode == tf.estimator.ModeKeys.TRAIN):
-      ds = ds.repeat(2)
+    if mode == tf.estimator.ModeKeys.TRAIN:
+        ds = ds.repeat(2)
 
     ds = ds.shuffle(100000)
-    ds = ds.map(_read_image, num_threads=10, output_buffer_size=10)
-    ds = ds.batch(16)
+    ds = ds.map(_read_image, num_threads=20, output_buffer_size=50)
+    ds = ds.batch(32)
 
     return ds
 
