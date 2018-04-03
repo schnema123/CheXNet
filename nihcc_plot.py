@@ -10,7 +10,6 @@ import sklearn.metrics
 import numpy as np
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 FINDINGS = ["Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass", "Nodule", "Pneumonia",
             "Pneumothorax", "Consolidation", "Edema", "Emphysema", "Fibrosis", "Pleural_Thickening", "Hernia"]
@@ -36,7 +35,7 @@ def _plot(labels, predictions, filename):
     plt.title('Receiver operating characteristic example')
     plt.legend(loc="lower right")
     
-    plt.savefig("../src/" + filename)
+    plt.savefig(filename)
 
 
 def _create_or_append(arr, val):
@@ -56,8 +55,10 @@ def plot_roc():
         model = nihcc_model.model_fn(features, labels, tf.estimator.ModeKeys.PREDICT)
         predictions = model.predictions
 
+        checkpoint = "../history/dropout_0/model.ckpt-19566"
+        print("Plotting checkpoint {}".format(checkpoint))
+
         saver = tf.train.Saver()
-        checkpoint = tf.train.latest_checkpoint("../tmp/")
         saver.restore(sess, checkpoint)
 
         prediction_values = None
@@ -73,9 +74,16 @@ def plot_roc():
             except tf.errors.OutOfRangeError:
                 break
 
+        print("Label values size: {}".format(len(label_values)))
+        print("Prediction values size: {}".format(len(prediction_values)))
+
         _plot(label_values, prediction_values, checkpoint + ".png")
 
 
-print("Printing ROC Curve...")
-plot_roc()
-print("Done printing ROC Curve")
+if __name__ == "__main__":
+    
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    
+    print("Printing ROC Curve...")
+    plot_roc()
+    print("Done printing ROC Curve")

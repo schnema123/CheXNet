@@ -6,6 +6,7 @@ import datetime
 import nihcc_input
 import nihcc_model
 import nihcc_utils
+import nihcc_plot
 
 def binary_crossentropy(y_true, y_pred):
     return tf.losses.sigmoid_cross_entropy(multi_class_labels=y_true, logits=y_pred, reduction=tf.losses.Reduction.SUM)
@@ -40,7 +41,7 @@ def main():
 
     # while current_epoch < train_for_n_epochs:
     while True:
-        print("Training for 2 epochs...")
+        print("Training for 1 epoch...")
         estimator.train(input_fn=lambda: nihcc_input.input_fn(tf.estimator.ModeKeys.TRAIN))
         print("Done training.")
         
@@ -48,6 +49,10 @@ def main():
         eval_results = estimator.evaluate(input_fn=lambda: nihcc_input.input_fn(tf.estimator.ModeKeys.EVAL))
         print(eval_results)
         print("Done evaluating model.")
+
+        # print("Printing ROC Curve...")
+        # nihcc_plot.plot_roc()
+        # print("Done printing ROC Curve")
 
         print("Done with epoch {}".format(current_epoch))
         current_epoch = current_epoch + 1

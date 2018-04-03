@@ -22,9 +22,8 @@ def network_fn(image, in_training):
     return net
 
 def loss_fn(labels, logits):
-    # "Optimize the sum of unweighted binary cross entropy losses"
     return tf.losses.sigmoid_cross_entropy(
-        multi_class_labels=labels, logits=logits, reduction=tf.losses.Reduction.SUM)
+        multi_class_labels=labels, logits=logits, reduction=tf.losses.Reduction.MEAN)
 
 def model_fn(
         features,
