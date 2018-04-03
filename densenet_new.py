@@ -37,7 +37,7 @@ def densenet121(inputs, num_classes,
     num_filters = 64,
     growth_rate = 32,
     compression = 0.5,
-    dropout_rate = 0.2,
+    dropout_rate = None,
     in_training = True,
     name="densenet121"):
 
