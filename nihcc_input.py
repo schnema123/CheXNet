@@ -22,7 +22,13 @@ def _read_image(filepath, label):
     # TODO: pytorch has a RandomResizedCrop function. Look into that?
     # TODO: It does seem that tensorflow acts weird on resizing images
     # https://hackernoon.com/how-tensorflows-tf-image-resize-stole-60-days-of-my-life-aba5eb093f35
-    image_decoded = tf.image.resize_images(image_decoded, [224, 224])
+
+    image_size = [256, 256]
+    image_decoded = tf.image.resize_images(image_decoded, image_size)
+    
+    crop_size = [224, 224, 3]
+    image_decoded = tf.random_crop(image_decoded, crop_size)
+
     image_decoded = tf.image.per_image_standardization(image_decoded)
     image_decoded = tf.image.random_flip_left_right(image_decoded)
 
@@ -90,9 +96,6 @@ def create_dataset(mode):
     labels= tf.convert_to_tensor(labels)
 
     ds = tf.contrib.data.Dataset.from_tensor_slices((images, labels))
-
-    # if mode == tf.estimator.ModeKeys.TRAIN:
-    #    ds = ds.repeat(2)
 
     ds = ds.shuffle(100000)
     ds = ds.map(_read_image, num_threads=20, output_buffer_size=50)

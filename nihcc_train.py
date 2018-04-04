@@ -39,6 +39,11 @@ def main():
     train_for_n_epochs = 100
     current_epoch = 0
 
+    # From the docs:
+    # Overfitting: In order to avoid overfitting, it is recommended to set up the training input_fn to shuffle the training data properly. 
+    # It is also recommended to train the model a little longer, say multiple epochs, before performing evaluation, as the input pipeline starts from scratch for each training.
+    # It is particularly important for local training and evaluation.
+
     # while current_epoch < train_for_n_epochs:
     while True:
         print("Training for 1 epoch...")
