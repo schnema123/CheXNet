@@ -7,7 +7,9 @@ def _conv2d(x, num_filters, kernel_size, stride):
                             kernel_size=kernel_size,
                             strides=stride,
                             padding="same", name="conv2d",
-                            use_bias=False, kernel_initializer=tf.contrib.layers.xavier_initializer())
+                            use_bias=False, 
+                            kernel_initializer=tf.contrib.layers.xavier_initializer(),
+                            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=1e-5))
 
 
 def _conv(x, num_filters, kernel_size, stride, in_training, dropout_rate, name):
@@ -89,29 +91,20 @@ def densenet121(inputs, num_classes,
         # Dense blocks
         # 6 -> 12 -> 24 -> 16
 
-        net, num_filters = _dense_block(
-            net, 6, num_filters, growth_rate, in_training, dropout_rate, "dense_block1")
-        net, num_filters = _transition_block(
-            net, num_filters, compression, in_training, dropout_rate, "transition_block1")
+        block_config=(6, 12, 24, 16)
+        for i, num_layers in enumerate(block_config):
 
-        net, num_filters = _dense_block(
-            net, 12, num_filters, growth_rate, in_training, dropout_rate, "dense_block2")
-        net, num_filters = _transition_block(
-            net, num_filters, compression, in_training, dropout_rate, "transition_block2")
-
-        net, num_filters = _dense_block(
-            net, 24, num_filters, growth_rate, in_training, dropout_rate, "dense_block3")
-        net, num_filters = _transition_block(
-            net, num_filters, compression, in_training, dropout_rate, "transition_block3")
-
-        net, num_filters = _dense_block(
-            net, 16, num_filters, growth_rate, in_training, dropout_rate, "dense_block4")
+            net, num_filters = _dense_block(
+                net, num_layers, num_filters, growth_rate, in_training, dropout_rate, "dense_block{}".format(i))
+            net, num_filters = _transition_block(
+                net, num_filters, compression, in_training, dropout_rate, "transition_block{}".format(i))
 
         net = tf.layers.batch_normalization(net)
         net = tf.nn.relu(net)
 
         # Do global average pooling
-        net = tf.reduce_mean(net, [1, 2], name="global_avg_pool")
+        # net = tf.reduce_mean(net, [1, 2], name="global_avg_pool")
+        net = tf.layers.average_pooling2d(net, pool_size=7, strides=1, name="global_avg_pool")
 
         # TODO: Remove this?
         # net = tf.contrib.layers.flatten(net)

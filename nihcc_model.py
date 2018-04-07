@@ -79,8 +79,15 @@ def model_fn(
 
                     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope)
                     with tf.control_dependencies(update_ops):
+
                         losses = tf.get_collection(tf.GraphKeys.LOSSES, scope)
-                        total_loss = tf.add_n(losses, name="total_loss")
+                        losses_sum = tf.add_n(losses)
+
+                        reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES, scope)
+                        reg_losses_sum = tf.add_n(reg_losses)
+
+                        total_loss = losses_sum + reg_losses_sum
+
                         tf.summary.scalar("total_loss", total_loss)
 
                     tf.get_variable_scope().reuse_variables()
