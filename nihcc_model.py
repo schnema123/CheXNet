@@ -60,7 +60,7 @@ def model_fn(
     num_gpu = 2
 
     global_step = tf.train.get_global_step()
-    optimizer = tf.train.AdamOptimizer(learning_rate=0.001, beta1=0.9, beta2=0.999, )
+    optimizer = tf.train.AdamOptimizer(learning_rate=0.001, beta1=0.9, beta2=0.999)
 
     image_split = tf.split(image, num_gpu)
     labels_split = tf.split(labels, num_gpu)

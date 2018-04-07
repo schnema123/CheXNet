@@ -55,7 +55,7 @@ def plot_roc():
         model = nihcc_model.model_fn(features, labels, tf.estimator.ModeKeys.PREDICT)
         predictions = model.predictions
 
-        checkpoint = "../history/new_input/model.ckpt-39241"
+        checkpoint = "../tmp/model.ckpt-103005"
         print("Plotting checkpoint {}".format(checkpoint))
 
         saver = tf.train.Saver()
