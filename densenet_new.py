@@ -7,15 +7,15 @@ def _conv2d(x, num_filters, kernel_size, stride):
                             kernel_size=kernel_size,
                             strides=stride,
                             padding="same", name="conv2d",
-                            use_bias=False, 
+                            use_bias=False,
                             kernel_initializer=tf.contrib.layers.xavier_initializer(),
                             kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=1e-5))
 
 
 def _batch_norm(x, in_training):
+    # TODO: This momentum value is very different to the default tensorflow one... Is this correct?
     return tf.layers.batch_normalization(
-            x, name="batch_norm", training=in_training, epsilon=1e-5, momentum=0.1)
-
+        x, name="batch_norm", training=in_training, epsilon=1e-5, momentum=0.1)
 
 
 def _conv(x, num_filters, kernel_size, stride, in_training, dropout_rate, name):
@@ -44,7 +44,7 @@ def _conv_block(x, num_filters, in_training, dropout_rate, name):
         y = _conv(y, num_filters=num_filters, kernel_size=3, stride=1,
                   in_training=in_training, dropout_rate=dropout_rate, name="conv_2")
 
-        y = tf.concat([x, y], axis=3)
+        y = tf.concat([x, y], axis=1)
         return y
 
 
@@ -81,7 +81,11 @@ def densenet121(inputs, num_classes,
                 name="densenet121"):
 
     with tf.variable_scope(name):
+
         net = inputs
+
+        # Change net to NCHW
+        net = tf.transpose(net, [0, 3, 1, 2])
 
         # Initial convolution
         net = _conv2d(net, num_filters, kernel_size=7, stride=2)
@@ -95,7 +99,7 @@ def densenet121(inputs, num_classes,
         # Dense blocks
         # 6 -> 12 -> 24 -> 16
 
-        block_config=(6, 12, 24, 16)
+        block_config = (6, 12, 24, 16)
         for i, num_layers in enumerate(block_config):
 
             net, num_filters = _dense_block(
@@ -107,7 +111,7 @@ def densenet121(inputs, num_classes,
         net = tf.nn.relu(net)
 
         # Do global average pooling
-        net = tf.reduce_mean(net, [1, 2], name="global_avg_pool")
+        net = tf.reduce_mean(net, [2, 3], name="global_avg_pool")
         # net = tf.layers.average_pooling2d(net, pool_size=7, strides=1, name="global_avg_pool")
 
         # TODO: Remove this?
