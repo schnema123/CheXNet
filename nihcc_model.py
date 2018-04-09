@@ -81,12 +81,9 @@ def model_fn(
                     with tf.control_dependencies(update_ops):
 
                         losses = tf.get_collection(tf.GraphKeys.LOSSES, scope)
-                        losses_sum = tf.add_n(losses)
+                        reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
 
-                        reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES, scope)
-                        reg_losses_sum = tf.add_n(reg_losses)
-
-                        total_loss = losses_sum + reg_losses_sum
+                        total_loss = tf.add_n(losses + reg_losses, name="total_loss")
 
                         tf.summary.scalar("total_loss", total_loss)
 

@@ -81,7 +81,7 @@ def densenet121(inputs, num_classes,
         # Initial convolution
         net = _conv2d(net, num_filters, kernel_size=7, stride=2)
         net = tf.layers.batch_normalization(
-            net, training=in_training, name="batch_norm",)
+            net, training=in_training, name="batch_norm")
         net = tf.nn.relu(net, name="relu")
 
         # Max Pooling
@@ -103,8 +103,8 @@ def densenet121(inputs, num_classes,
         net = tf.nn.relu(net)
 
         # Do global average pooling
-        # net = tf.reduce_mean(net, [1, 2], name="global_avg_pool")
-        net = tf.layers.average_pooling2d(net, pool_size=7, strides=1, name="global_avg_pool")
+        net = tf.reduce_mean(net, [1, 2], name="global_avg_pool")
+        # net = tf.layers.average_pooling2d(net, pool_size=7, strides=1, name="global_avg_pool")
 
         # TODO: Remove this?
         # net = tf.contrib.layers.flatten(net)
