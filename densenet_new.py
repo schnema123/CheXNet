@@ -12,12 +12,17 @@ def _conv2d(x, num_filters, kernel_size, stride):
                             kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=1e-5))
 
 
+def _batch_norm(x, in_training):
+    return tf.layers.batch_normalization(
+            x, name="batch_norm", training=in_training, epsilon=1e-5, momentum=0.1)
+
+
+
 def _conv(x, num_filters, kernel_size, stride, in_training, dropout_rate, name):
 
     with tf.variable_scope(name):
 
-        x = tf.layers.batch_normalization(
-            x, name="batch_norm", training=in_training)
+        x = _batch_norm(x, in_training=in_training)
         x = tf.nn.relu(x, name="relu")
         x = _conv2d(x, num_filters=num_filters,
                     kernel_size=kernel_size, stride=stride)
@@ -80,8 +85,7 @@ def densenet121(inputs, num_classes,
 
         # Initial convolution
         net = _conv2d(net, num_filters, kernel_size=7, stride=2)
-        net = tf.layers.batch_normalization(
-            net, training=in_training, name="batch_norm")
+        net = _batch_norm(net, in_training=in_training)
         net = tf.nn.relu(net, name="relu")
 
         # Max Pooling
@@ -99,7 +103,7 @@ def densenet121(inputs, num_classes,
             net, num_filters = _transition_block(
                 net, num_filters, compression, in_training, dropout_rate, "transition_block{}".format(i))
 
-        net = tf.layers.batch_normalization(net)
+        net = _batch_norm(net, in_training=in_training)
         net = tf.nn.relu(net)
 
         # Do global average pooling
