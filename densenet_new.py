@@ -8,8 +8,8 @@ def _conv2d(x, num_filters, kernel_size, stride):
                             strides=stride,
                             padding="same", name="conv2d",
                             use_bias=False, 
-                            kernel_initializer=tf.contrib.layers.xavier_initializer(),
-                            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=1e-5))
+                            kernel_initializer=tf.contrib.layers.xavier_initializer())
+                            # kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=0.0))
 
 
 def _batch_norm(x, in_training):
@@ -100,8 +100,10 @@ def densenet121(inputs, num_classes,
 
             net, num_filters = _dense_block(
                 net, num_layers, num_filters, growth_rate, in_training, dropout_rate, "dense_block{}".format(i))
-            net, num_filters = _transition_block(
-                net, num_filters, compression, in_training, dropout_rate, "transition_block{}".format(i))
+            
+            if i != len(block_config) - 1:
+                net, num_filters = _transition_block(
+                    net, num_filters, compression, in_training, dropout_rate, "transition_block{}".format(i))
 
         net = _batch_norm(net, in_training=in_training)
         net = tf.nn.relu(net)
