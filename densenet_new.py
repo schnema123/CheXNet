@@ -8,8 +8,8 @@ def _conv2d(x, num_filters, kernel_size, stride):
                             strides=stride,
                             padding="same", name="conv2d",
                             use_bias=False, 
-                            kernel_initializer=tf.contrib.layers.xavier_initializer())
-                            # kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=0.0))
+                            kernel_initializer=tf.contrib.layers.xavier_initializer(),
+                            kernel_regularizer=tf.contrib.layers.l2_regularizer(scale=1e-6))
 
 
 def _batch_norm(x, in_training):

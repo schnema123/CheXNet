@@ -3,7 +3,6 @@ import tensorflow.contrib.slim as slim
 import tensorflow.contrib.slim.nets as slim_nets
 
 import nihcc_utils
-import densenet
 import densenet_new
 
 
@@ -62,7 +61,7 @@ def model_fn(
     loss = loss_fn(labels, logits)
 
     reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-    total_loss = loss # + tf.add_n(reg_losses)
+    total_loss = loss + tf.add_n(reg_losses)
     tf.summary.scalar("total_loss", total_loss)
 
     global_step = tf.train.get_global_step()

@@ -8,8 +8,7 @@ import nihcc_model
 import nihcc_utils
 import nihcc_plot
 
-def binary_crossentropy(y_true, y_pred):
-    return tf.losses.sigmoid_cross_entropy(multi_class_labels=y_true, logits=y_pred, reduction=tf.losses.Reduction.SUM)
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 def main():
 
@@ -36,7 +35,6 @@ def main():
     #  densenet121.compile(optimizer="adam", loss=binary_crossentropy)
     #  estimator = tf.keras.estimator.model_to_estimator(densenet121, model_dir="../tmp/")
 
-    train_for_n_epochs = 100
     current_epoch = 0
 
     # From the docs:
@@ -44,7 +42,6 @@ def main():
     # It is also recommended to train the model a little longer, say multiple epochs, before performing evaluation, as the input pipeline starts from scratch for each training.
     # It is particularly important for local training and evaluation.
 
-    # while current_epoch < train_for_n_epochs:
     while True:
         print("Training for 1 epoch...")
         estimator.train(input_fn=lambda: nihcc_input.input_fn(tf.estimator.ModeKeys.TRAIN))

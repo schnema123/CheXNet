@@ -98,13 +98,15 @@ def create_dataset(mode):
     images = tf.convert_to_tensor(images)
     labels = tf.convert_to_tensor(labels)
 
-    ds = tf.contrib.data.Dataset.from_tensor_slices((images, labels))
+    ds = tf.data.Dataset.from_tensor_slices((images, labels))
 
     ds = ds.shuffle(100000)
 
     in_training = (mode == tf.estimator.ModeKeys.TRAIN)
-    ds = ds.map(lambda filepath, label: _read_image(filepath, label, in_training),
-                num_threads=20, output_buffer_size=50)
+
+    ds = ds.map(lambda filepath, label: _read_image(filepath, label, in_training), num_parallel_calls=20)
+    ds = ds.prefetch(50)
+
     ds = ds.batch(16)
 
     return ds
