@@ -22,8 +22,7 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-
-slim = tf.contrib.slim
+import tensorflow.contrib.slim as slim
 
 
 @slim.add_arg_scope
@@ -131,7 +130,8 @@ def densenet(inputs,
          slim.arg_scope([slim.conv2d, _conv, _conv_block,
                          _dense_block, _transition_block], 
                          outputs_collections=end_points_collection), \
-         slim.arg_scope([_conv], dropout_rate=dropout_rate):
+         slim.arg_scope([_conv], dropout_rate=dropout_rate), \
+         slim.arg_scope([slim.batch_norm], fused=False):
       net = inputs
 
       # initial convolution
